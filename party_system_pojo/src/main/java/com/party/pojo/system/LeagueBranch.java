@@ -1,6 +1,7 @@
 package com.party.pojo.system;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.io.Serializable;
 /**
  * leagueBranch实体类
@@ -13,12 +14,9 @@ public class LeagueBranch implements Serializable{
 	@Id
 	private Integer id;//id
 
-
-	
-
 	private String name;//name
 
-	private Integer phone;//phone
+	private String phone;//phone
 
 	private String address;//address
 
@@ -27,6 +25,10 @@ public class LeagueBranch implements Serializable{
 	private java.util.Date createTime;//create_time
 
 	private Integer groupId;//group_id
+
+	//处理不在数据库的字段
+	@Transient
+	private String groupName;
 
 	private Integer accountId;//account_id
 
@@ -45,10 +47,10 @@ public class LeagueBranch implements Serializable{
 		this.name = name;
 	}
 
-	public Integer getPhone() {
+	public String getPhone() {
 		return phone;
 	}
-	public void setPhone(Integer phone) {
+	public void setPhone(String phone) {
 		this.phone = phone;
 	}
 
@@ -78,6 +80,14 @@ public class LeagueBranch implements Serializable{
 	}
 	public void setGroupId(Integer groupId) {
 		this.groupId = groupId;
+	}
+
+	public String getGroupName() {
+		return groupName;
+	}
+
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
 	}
 
 	public Integer getAccountId() {

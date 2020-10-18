@@ -64,8 +64,8 @@
 <el-input v-model="searchMap.note" placeholder="note" class="filter-item" ></el-input></el-form-item>
           <el-form-item label="create_time">
 <el-input v-model="searchMap.createTime" placeholder="create_time" class="filter-item" ></el-input></el-form-item>
-          <el-form-item label="group_id">
-<el-input v-model="searchMap.groupId" placeholder="group_id" class="filter-item" ></el-input></el-form-item>
+          <el-form-item label="group_name">
+<el-input v-model="searchMap.groupName" placeholder="group_name" class="filter-item" ></el-input></el-form-item>
           <el-form-item label="account_id">
 <el-input v-model="searchMap.accountId" placeholder="account_id" class="filter-item" ></el-input></el-form-item>
 
@@ -81,7 +81,7 @@
           <el-table-column prop="address" label="address" width="80"></el-table-column>
           <el-table-column prop="note" label="note" width="80"></el-table-column>
           <el-table-column prop="createTime" label="create_time" width="80"></el-table-column>
-          <el-table-column prop="groupId" label="group_id" width="80"></el-table-column>
+          <el-table-column prop="groupName" label="group_name" width="80"></el-table-column>
           <el-table-column prop="accountId" label="account_id" width="80"></el-table-column>
 
                     <el-table-column
@@ -113,7 +113,7 @@
         <el-form-item label="address"><el-input v-model="pojo.address"></el-input></el-form-item>
         <el-form-item label="note"><el-input v-model="pojo.note"></el-input></el-form-item>
         <el-form-item label="create_time"><el-input v-model="pojo.createTime"></el-input></el-form-item>
-        <el-form-item label="group_id"><el-input v-model="pojo.groupId"></el-input></el-form-item>
+        <el-form-item label="group_name"><el-input v-model="pojo.groupName"></el-input></el-form-item>
         <el-form-item label="account_id"><el-input v-model="pojo.accountId"></el-input></el-form-item>
 
                             <!-- 图片上传代码 如页面有图片上传功能放开注释 ****

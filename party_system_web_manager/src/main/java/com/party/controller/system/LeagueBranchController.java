@@ -31,6 +31,7 @@ public class LeagueBranchController {
         return leagueBranchService.findList(searchMap);
     }
 
+    //真正执行这个是这个方法，带条件分页查询
     @PostMapping("/findPage")
     public PageResult<LeagueBranch> findPage(@RequestBody Map<String,Object> searchMap,int page, int size){
         return  leagueBranchService.findPage(searchMap,page,size);
