@@ -144,23 +144,14 @@
 									</el-input>
 								</el-form-item>
 								<el-form-item label="上级">
-									<el-select
-											clearable
-											v-model="editForm.group"
-											placeholder="请选择所属党小组">
-										<el-option
-												v-for="group in groups3"
-												:label="group.name"
-												:key="group.id"
-												:value="group.id">
-											<span style="float: left">{{ group.name }}</span>
-											<span style="float: right; color: #8492a6; font-size: 13px">
-														<el-tag size="mini" effect="plain" type="success">
-															{{ group.total }}个团支部
-														</el-tag>
-												</span>
-										</el-option>
-									</el-select>
+									<el-cascader
+											:options="groups"
+											v-model="addForm.group"
+											:props="{ checkStrictly: true }"
+											@change="change3"
+											collapse-tags="true"
+											clearable>
+									</el-cascader>
 								</el-form-item>
 							</el-form>
 							<!-- 底部区域 -->
@@ -191,23 +182,13 @@
 									</el-input>
 								</el-form-item>
 								<el-form-item label="上级">
-									<el-select
-											clearable
+									<el-cascader
+											:options="groups"
 											v-model="editForm.group"
-											placeholder="请选择所属党小组">
-										<el-option
-												v-for="group in groups2"
-												:label="group.name"
-												:key="group.id"
-												:value="group.id">
-											<span style="float: left">{{ group.name }}</span>
-											<span style="float: right; color: #8492a6; font-size: 13px">
-														<el-tag size="mini" effect="plain" type="success">
-															{{ group.total }}个团支部
-														</el-tag>
-												</span>
-										</el-option>
-									</el-select>
+											:props="{ checkStrictly: true }"
+											@change="change2"
+											clearable>
+									</el-cascader>
 								</el-form-item>
 							</el-form>
 							<span slot="footer" class="dialog-footer">
@@ -232,23 +213,13 @@
 										<el-input v-model="formLabelAlign.sum" disabled></el-input>
 									</el-form-item>
 									<el-form-item label="修改上级">
-										<el-select
-												clearable
+										<el-cascader
+												:options="groups"
 												v-model="formLabelAlign.group"
-												placeholder="请选择所属上级">
-											<el-option
-													v-for="group in groups"
-													:label="group.name"
-													:key="group.id"
-													:value="group.id">
-												<span style="float: left">{{ group.name }}</span>
-												<span style="float: right; color: #8492a6; font-size: 13px">
-														<el-tag size="mini" effect="plain" type="success">
-															{{ group.total }}个团支部
-														</el-tag>
-												</span>
-											</el-option>
-										</el-select>
+												:props="{ checkStrictly: true }"
+												@change="change"
+												clearable>
+										</el-cascader>
 									</el-form-item>
 								</el-form>
 							</div>
@@ -344,9 +315,7 @@
 							group: '',
 							sum: ''
 						},
-						groups: [],
-						groups2: [],
-						groups3: []
+						groups: []
 					}
 				},
 				created() {
@@ -425,24 +394,7 @@
 						console.log(`当前页: ${val}`);
 					},
 					addDialogOpen() {
-						this.groups3 = [
-								{
-							id: '1',
-							name: '信科院第一党小组',
-							total: 5
-						}, {
-							id: '2',
-							name: '信科院第二党小组',
-							total: 3
-						}, {
-							id: '3',
-							name: '信科院第三党小组',
-							total: 4
-						}, {
-							id: '4',
-							name: '信科院第四党小组',
-							total: 2
-						}];
+						this.getGroups()
 						this.addDialogVisible = true
 					},
 					// 点击按钮，添加新团支部
@@ -461,6 +413,7 @@
 					// 监听添加团支部对话框的关闭事件
 					addDialogClosed() {
 						this.$refs.addFormRef.resetFields()
+						this.groups = []
 					},
 					// 展示编辑团支部的对话框
 					showEditDialog(id) {
@@ -472,29 +425,13 @@
 							groupAddress: '仲恺农业工程学院',
 							groupNote: '啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊'
 						}
-						this.groups2 = [
-							{
-								id: '1',
-								name: '信科院第一党小组',
-								total: 5
-							}, {
-								id: '2',
-								name: '信科院第二党小组',
-								total: 3
-							}, {
-								id: '3',
-								name: '信科院第三党小组',
-								total: 4
-							}, {
-								id: '4',
-								name: '信科院第四党小组',
-								total: 2
-							}];
+						this.getGroups()
 						this.editDialogVisible = true
 					},
 					// 监听修改团支部对话框的关闭事件
 					editDialogClosed() {
 						this.$refs.editFormRef.resetFields()
+						this.groups = []
 					},
 					// 修改团支部信息并提交
 					editGroupInfo() {
@@ -526,28 +463,120 @@
 							party: '',
 							sum: ''
 						}
+						this.groups = []
+					},
+					change(value) {
+						if (value.length == 1){
+							this.formLabelAlign.group = []
+						}
+					},
+					change2(value) {
+						if (value.length == 1){
+							this.editForm.group = []
+						}
+					},
+					change3(value) {
+						if (value.length == 1){
+							this.addForm.group = []
+						}
 					},
 					/**
 					 * 加载所有上级
 					 */
 					getGroups() {
-						this.groups = [{
-							id: '1',
-							name: '信科院第一党小组',
-							total: 5
-						}, {
-							id: '2',
-							name: '信科院第二党小组',
-							total: 3
-						}, {
-							id: '3',
-							name: '信科院第三党小组',
-							total: 4
-						}, {
-							id: '4',
-							name: '信科院第四党小组',
-							total: 2
-						}];
+						this.groups = [
+							{
+								value: '信科院第一党总支',
+								label: '信科院第一党总支',
+								children: [{
+									value: '信科院第一党支部',
+									label: '信科院第一党支部',
+									children: [{
+										value: '第一党小组',
+										label: '第一党小组'
+									}, {
+										value: '第二党小组',
+										label: '第二党小组'
+									}, {
+										value: '第三党小组',
+										label: '第三党小组'
+									}, {
+										value: '第三党小组',
+										label: '第三党小组'
+									}]
+								}, {
+									value: '信科院第二党支部',
+									label: '信科院第二党支部',
+									children: [{
+										value: '第一党小组',
+										label: '第一党小组'
+									}, {
+										value: '第二党小组',
+										label: '第二党小组'
+									}]
+								}]
+							}, {
+								value: '信科院第二党总支',
+								label: '信科院第二党总支',
+								children: [{
+									value: '第一党支部',
+									label: '第一党支部',
+									children: [{
+										value: '第一党小组',
+										label: '第一党小组'
+									}, {
+										value: '第二党小组',
+										label: '第二党小组'
+									}, {
+										value: '第三党小组',
+										label: '第三党小组'
+									}, {
+										value: '第四党小组',
+										label: '第四党小组'
+									}, {
+										value: '第五党小组',
+										label: '第五党小组'
+									}]
+								}, {
+									value: '第二党支部',
+									label: '第二党支部',
+									children: [{
+										value: '第一党小组',
+										label: '第一党小组'
+									}, {
+										value: '第二党小组',
+										label: '第二党小组'
+									}, {
+										value: '第三党小组',
+										label: '第三党小组'
+									}, {
+										value: '第四党小组',
+										label: '第四党小组'
+									}, {
+										value: '第五党小组',
+										label: '第五党小组'
+									}]
+								}, {
+									value: '第三党支部',
+									label: '第三党支部',
+									children: [{
+										value: '第一党小组',
+										label: '第一党小组'
+									}, {
+										value: '第二党小组',
+										label: '第二党小组'
+									}, {
+										value: '第三党小组',
+										label: '第三党小组'
+									}, {
+										value: '第四党小组',
+										label: '第四党小组'
+									}, {
+										value: '第五党小组',
+										label: '第五党小组'
+									}]
+								}]
+							}]
 					},
 					// 根据Id删除对应的团支部信息
 					async removeGroupById(id) {
