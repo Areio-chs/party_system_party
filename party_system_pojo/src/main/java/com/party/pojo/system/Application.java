@@ -31,11 +31,13 @@ public class Application implements Serializable{
 
 	private String classNum;//class
 
-	private Integer leagueMemberId;//league_member_id
 
 	private Integer accountId;//account_id
 
+
 	private String status;//1仍为申请人0为其他
+
+	private String email;
 
 	
 	public Integer getId() {
@@ -108,12 +110,6 @@ public class Application implements Serializable{
 		this.classNum = classNum;
 	}
 
-	public Integer getLeagueMemberId() {
-		return leagueMemberId;
-	}
-	public void setLeagueMemberId(Integer leagueMemberId) {
-		this.leagueMemberId = leagueMemberId;
-	}
 
 	public Integer getAccountId() {
 		return accountId;
@@ -130,5 +126,11 @@ public class Application implements Serializable{
 	}
 
 
-	
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
 }

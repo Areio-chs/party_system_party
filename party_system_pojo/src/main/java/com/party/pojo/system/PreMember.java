@@ -32,7 +32,7 @@ public class PreMember implements Serializable{
 
 	private String status;//1仍为预备党员0为其他
 
-	private Integer leagueMemberId;//league_member_id
+//	private Integer leagueMemberId;//league_member_id
 
 	
 	public Integer getId() {
@@ -98,12 +98,12 @@ public class PreMember implements Serializable{
 		this.status = status;
 	}
 
-	public Integer getLeagueMemberId() {
-		return leagueMemberId;
-	}
-	public void setLeagueMemberId(Integer leagueMemberId) {
-		this.leagueMemberId = leagueMemberId;
-	}
+//	public Integer getLeagueMemberId() {
+//		return leagueMemberId;
+//	}
+//	public void setLeagueMemberId(Integer leagueMemberId) {
+//		this.leagueMemberId = leagueMemberId;
+//	}
 
 
 	

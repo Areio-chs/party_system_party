@@ -32,6 +32,8 @@ public class LeagueBranch implements Serializable{
 
 	private Integer accountId;//account_id
 
+	private Integer partyId;
+
 	
 	public Integer getId() {
 		return id;
@@ -97,6 +99,11 @@ public class LeagueBranch implements Serializable{
 		this.accountId = accountId;
 	}
 
+	public Integer getPartyId() {
+		return partyId;
+	}
 
-	
+	public void setPartyId(Integer partyId) {
+		this.partyId = partyId;
+	}
 }

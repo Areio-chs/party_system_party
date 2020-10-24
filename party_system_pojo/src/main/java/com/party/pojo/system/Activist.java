@@ -32,7 +32,7 @@ public class Activist implements Serializable{
 
 	private String status;//1仍为积极分子0为其他
 
-	private Integer leagueMemberId;//团员id
+//	private Integer leagueMemberId;//团员id
 
 	
 	public Integer getId() {
@@ -98,12 +98,12 @@ public class Activist implements Serializable{
 		this.status = status;
 	}
 
-	public Integer getLeagueMemberId() {
-		return leagueMemberId;
-	}
-	public void setLeagueMemberId(Integer leagueMemberId) {
-		this.leagueMemberId = leagueMemberId;
-	}
+//	public Integer getLeagueMemberId() {
+//		return leagueMemberId;
+//	}
+//	public void setLeagueMemberId(Integer leagueMemberId) {
+//		this.leagueMemberId = leagueMemberId;
+//	}
 
 
 	

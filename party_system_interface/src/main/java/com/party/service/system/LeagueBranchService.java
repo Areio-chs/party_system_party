@@ -32,4 +32,5 @@ public interface LeagueBranchService {
 
     public void delete(Integer id);
 
+    public void tissueTransfer(Integer id,Integer group_id,Integer party_id);
 }

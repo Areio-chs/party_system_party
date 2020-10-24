@@ -43,9 +43,20 @@ public class ApplicationController {
 
 
     @PostMapping("/add")
-    public Result add(@RequestBody Application application){
-        applicationService.add(application);
-        return new Result();
+    public Result add(@RequestBody Application application,Integer leagueMemberId){
+        //把某个团员变成入党申请人
+        Integer  flag = applicationService.add(application);
+        //默认申请成功 code为0
+        String message="添加成功 ";
+        Integer code= new Integer(0);
+        if (flag==0){
+            message="申请失败，该申请人并非团员";
+            code=1;
+        }else if (flag==-1){
+            message="申请失败，该申请人已存在";
+            code=1;
+        }
+        return new Result(code,message);
     }
 
     @PostMapping("/update")

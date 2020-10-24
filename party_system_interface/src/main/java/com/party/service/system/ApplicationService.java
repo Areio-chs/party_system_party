@@ -24,7 +24,7 @@ public interface ApplicationService {
 
     public Application findById(Integer id);
 
-    public void add(Application application);
+    public Integer add(Application application);
 
 
     public void update(Application application);

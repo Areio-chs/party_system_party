@@ -5,9 +5,13 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.party.dao.GroupMapper;
 import com.party.dao.LeagueBranchMapper;
+import com.party.dao.LeagueMemberMapper;
+import com.party.dao.PartyMapper;
 import com.party.entity.PageResult;
 import com.party.pojo.system.Group;
 import com.party.pojo.system.LeagueBranch;
+import com.party.pojo.system.LeagueMember;
+import com.party.pojo.system.Party;
 import com.party.service.system.LeagueBranchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import tk.mybatis.mapper.entity.Example;
@@ -23,6 +27,12 @@ public class LeagueBranchServiceImpl implements LeagueBranchService {
 
     @Autowired
     private GroupMapper groupMapper;
+
+    @Autowired
+    private LeagueMemberMapper leagueMemberMapper;
+
+    @Autowired
+    private PartyMapper partyMapper;
 
     /**
      * 返回全部记录
@@ -112,6 +122,46 @@ public class LeagueBranchServiceImpl implements LeagueBranchService {
      */
     public void delete(Integer id) {
         leagueBranchMapper.deleteByPrimaryKey(id);
+    }
+
+    //两个只能选择一个或者两个都不选择
+    @Override
+    public void tissueTransfer(Integer id,Integer group_id,Integer party_id) {
+        System.out.println("there");
+        System.out.println(id);
+        System.out.println(group_id);
+        System.out.println(party_id);
+        if (group_id!=null){
+            //先把这个党支部的党员全部转到这个党小组里面，再把党支部对接到该党小组
+            //1.找出该团支部的所有党员
+//            Example example = new Example(LeagueMember.class);
+//            Example.Criteria criteria = example.createCriteria();
+//            criteria.andEqualTo("leagueBranchId",id);
+//            List<LeagueMember> leagueMemberList = leagueMemberMapper.selectByExample(example);
+//            for (LeagueMember leagueMember:leagueMemberList){
+//
+//            }
+
+            //查询新对接的党小组属于哪个党支部
+            LeagueBranch leagueBranch = new LeagueBranch();
+            //1.查询出新对接的党小组
+            Group group = groupMapper.selectByPrimaryKey(group_id);
+            leagueBranch.setId(id);
+            leagueBranch.setGroupId(group_id);
+            leagueBranch.setPartyId(group.getPartyId());
+            leagueBranchMapper.updateByPrimaryKeySelective(leagueBranch);
+
+
+        }
+        else if (party_id!=null){
+            //说明该党支部没有小组，团支部直接对接党支部，这时候设置党小组id为空
+            LeagueBranch leagueBranch = new LeagueBranch();
+            leagueBranch.setId(id);
+            leagueBranch.setPartyId(party_id);
+            //当党支部没有党小组时，默认给他分配第0小组
+            leagueBranch.setGroupId(0);
+            leagueBranchMapper.updateByPrimaryKeySelective(leagueBranch);
+        }
     }
 
     /**

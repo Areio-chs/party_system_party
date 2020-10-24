@@ -28,7 +28,7 @@ public class Member implements Serializable{
 
 	private String status;//1仍为正式党员0为其他
 
-	private Integer leagueMemberId;//league_member_id
+//	private Integer leagueMemberId;//league_member_id
 
 	
 	public Integer getId() {
@@ -80,12 +80,12 @@ public class Member implements Serializable{
 		this.status = status;
 	}
 
-	public Integer getLeagueMemberId() {
-		return leagueMemberId;
-	}
-	public void setLeagueMemberId(Integer leagueMemberId) {
-		this.leagueMemberId = leagueMemberId;
-	}
+//	public Integer getLeagueMemberId() {
+//		return leagueMemberId;
+//	}
+//	public void setLeagueMemberId(Integer leagueMemberId) {
+//		this.leagueMemberId = leagueMemberId;
+//	}
 
 
 	

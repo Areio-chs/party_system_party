@@ -46,6 +46,9 @@ public class LeagueMember implements Serializable{
 
 	private Integer accountId;//account_id
 
+	private String email;
+
+
 
 	public Integer getId() {
 		return id;
@@ -151,5 +154,13 @@ public class LeagueMember implements Serializable{
 
 	public void setLeagueBranchName(String leagueBranchName) {
 		this.leagueBranchName = leagueBranchName;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 }

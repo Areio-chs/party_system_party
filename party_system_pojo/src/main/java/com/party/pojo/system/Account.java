@@ -1,4 +1,5 @@
 package com.party.pojo.system;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
@@ -11,6 +12,7 @@ import java.io.Serializable;
 public class Account implements Serializable{
 
 	@Id
+	@GeneratedValue(generator = "JDBC")
 	private Integer id;//id
 
 

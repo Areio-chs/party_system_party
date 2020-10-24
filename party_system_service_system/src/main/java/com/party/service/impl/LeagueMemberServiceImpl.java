@@ -100,7 +100,9 @@ public class LeagueMemberServiceImpl implements LeagueMemberService {
      * @param leagueMember
      */
     public void add(LeagueMember leagueMember) {
+        //新增一个团员不涉及其他表
         leagueMemberMapper.insert(leagueMember);
+
     }
 
     /**

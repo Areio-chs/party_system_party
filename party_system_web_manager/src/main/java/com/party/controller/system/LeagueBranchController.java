@@ -61,4 +61,15 @@ public class LeagueBranchController {
         return new Result();
     }
 
+    /*修改团支部对接的党小组/党支部
+    * 要考虑到一旦转移了该团支部下的团员都会一起转移
+    * 非表单提交都可以用get把？用post好像用写在postman的json都要加上@RequestBody，否则只能写在请求路径上
+    * @RequestBody传入了空总是要报错
+    * */
+    @GetMapping("tissueTransfer")
+    public Result tissueTransfer(Integer id,Integer group_id,Integer party_id){
+        leagueBranchService.tissueTransfer(id,group_id,party_id);
+        return new Result();
+    }
+
 }
