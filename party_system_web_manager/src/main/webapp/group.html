@@ -32,21 +32,21 @@
 						<!-- 搜索与添加区域 -->
 						<el-form :inline="true" ref="form" :model="queryInfo" size="mini" label-width="70px">
 							<el-form-item>
-								<el-input placeholder="请输入党小组名字" v-model="queryInfo.groupName" clearable>
-									<el-button slot="append" icon="el-icon-search"></el-button>
+								<el-input placeholder="请输入党小组名字" v-model="searchMap.groupName" clearable>
+									<el-button slot="append" icon="el-icon-search" type="primary" @click="fetchData" ></el-button>
 								</el-input>
 							</el-form-item>
 
 							<el-form-item>
-								<el-button type="primary" icon="el-icon-plus" @click="addDialogVisible = true">添加</el-button>
-								<el-button type="warning" icon="el-icon-s-promotion" @click="showRelationshipDialog">添加</el-button>
+								<el-button type="primary" icon="el-icon-plus" @click="addDialogVisible = true;addForm={}">添加</el-button>
+								<el-button type="warning" icon="el-icon-s-promotion" @click="showRelationshipDialog">组织转移</el-button>
 								<el-button type="success" icon="el-icon-download">导出</el-button>
 							</el-form-item>
 						</el-form>
 
 						<el-table
 								ref="multipleTable"
-								:data="GroupList"
+								:data="tableData"
 								tooltip-effect="dark"
 								style="width: 100%"
 								size="mini"
@@ -56,7 +56,7 @@
 									type="selection"
 									width="55">
 							</el-table-column>
-							<el-table-column 
+							<el-table-column
 									type="index"
 									label="#">
 							</el-table-column>
@@ -87,7 +87,7 @@
 									sortable>
 							</el-table-column>
 							<el-table-column
-									prop="party"
+									prop="partyName"
 									label="所属党支部"
 									sortable>
 							</el-table-column>
@@ -99,21 +99,21 @@
 									</el-tooltip>
 									<!-- 删除按钮 -->
 									<el-tooltip effect="dark" content="删除信息" placement="top" :enterable="false">
-										<el-button type="danger" icon="el-icon-delete" size="mini" @click="removeGroupById(scope.row.id)"></el-button>
+										<el-button type="danger" icon="el-icon-delete" size="mini" @click="dele(scope.row.id)"></el-button>
 									</el-tooltip>
 								</template>
 							</el-table-column>
 						</el-table>
 
-						<!-- 分页区域 -->
-						<el-pagination @size-change="handleSizeChange"
-									   @current-change="handleCurrentChange"
-									   :current-page="queryInfo.pagenum"
-									   :page-sizes="[1, 2, 5, 10]"
-									   :page-size="queryInfo.pagesize"
-									   layout="total, sizes, prev, pager, next, jumper"
-									   :total="total">
-						</el-pagination>
+			<!-- 分页区域 -->
+			<el-pagination @size-change="handleSizeChange"
+						   @current-change="handleCurrentChange"
+						   :current-page.sync="currentPage"
+						   :page-sizes="[5, 10, 20, 30]"
+						   :page-size="size"
+						   layout="total, sizes, prev, pager, next, jumper"
+						   :total="total">
+			</el-pagination>
 
 						<!-- 添加党小组的对话框 -->
 						<el-dialog title="添加党小组" :visible.sync="addDialogVisible" width="50%" @close="addDialogClosed">
@@ -160,7 +160,7 @@
 							<!-- 底部区域 -->
 							<span slot="footer" class="dialog-footer">
         					<el-button @click="addDialogVisible = false">取 消</el-button>
-        					<el-button type="primary" @click="addGroup">确 定</el-button>
+        					<el-button type="primary" @click="add()">确 定</el-button>
       					</span>
 						</el-dialog>
 
@@ -206,7 +206,7 @@
 							</el-form>
 							<span slot="footer" class="dialog-footer">
         					<el-button @click="editDialogVisible = false">取 消</el-button>
-        					<el-button type="primary" @click="editGroupInfo">确 定</el-button>
+        					<el-button type="primary" @click="edit()">确 定</el-button>
       					</span>
 						</el-dialog>
 
@@ -271,30 +271,23 @@
 					var checkMobile = (rule, value, cb) => {
 						// 验证手机号的正则表达式
 						const regMobile = /^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/
-
 						if (regMobile.test(value)) {
 							return cb()
 						}
-
 						cb(new Error('请输入合法的手机号'))
 					}
 					return {
-						// 获取党小组列表的参数对象
-						queryInfo: {
-							// 当前的页数
-							pagenum: 1,
-							// 当前每页显示多少条数据
-							pagesize: 2,
-							//按名字查询
-							groupName: ''
-						},
-						GroupList: [],
+						tableData: [],
 						//全选
 						multipleSelection: [],
 						//当前页
-						currentPage4: 1,
+						currentPage: 1,
 						//总数
 						total: 10,
+						//显示条数
+						size:10,
+						//查询条件
+						searchMap:{},
 						// 控制修改党小组对话框的显示与隐藏
 						editDialogVisible: false,
 						// 查询到的党小组信息对象
@@ -315,13 +308,7 @@
 						// 控制添加党小组对话框的显示与隐藏
 						addDialogVisible: false,
 						// 添加党小组的表单数据
-						addForm: {
-							groupName: '',
-							groupPhone: '',
-							groupAddress: '',
-							groupNote: '',
-							party: ''
-						},
+						addForm: {},
 						// 添加表单的验证规则对象
 						addFormRules: {
 							groupName: [
@@ -346,62 +333,23 @@
 					}
 				},
 				created() {
-					this.getGroupList()
-					this.getPartys()
+					this.fetchData();
+					this.getPartys();
 				},
 				methods: {
-					getGroupList() {
-						//向后台获取党小组列表
-						this.GroupList = [{
-							groupName: '王小虎',
-							groupPhone: '1375464634',
-							groupAddress: '仲恺农业工程学院',
-							groupNote: '啊啊啊啊啊啊啊啊啊啊啊啊啊',
-							groupTime: '2020/09/19',
-							party: '信科院第一党支部'
-						}, {
-							groupName: '王小虎',
-							groupPhone: '1375464634',
-							groupAddress: '仲恺农业工程学院',
-							groupNote: '啊啊啊啊啊啊啊啊啊啊啊啊啊',
-							groupTime: '2020/09/19',
-							party: '信科院第一党支部'
-						}, {
-							groupName: '王小虎',
-							groupPhone: '1375464634',
-							groupAddress: '仲恺农业工程学院',
-							groupNote: '啊啊啊啊啊啊啊啊啊啊啊啊啊',
-							groupTime: '2020/09/19',
-							party: '信科院第一党支部'
-						}, {
-							groupName: '王小虎',
-							groupPhone: '1375464634',
-							groupAddress: '仲恺农业工程学院',
-							groupNote: '啊啊啊啊啊啊啊啊啊啊啊啊啊',
-							groupTime: '2020/09/19',
-							party: '信科院第一党支部'
-						}, {
-							groupName: '王小虎',
-							groupPhone: '1375464634',
-							groupAddress: '仲恺农业工程学院',
-							groupNote: '啊啊啊啊啊啊啊啊啊啊啊啊啊',
-							groupTime: '2020/09/19',
-							party: '信科院第一党支部'
-						}, {
-							groupName: '王小虎',
-							groupPhone: '1375464634',
-							groupAddress: '仲恺农业工程学院',
-							groupNote: '啊啊啊啊啊啊啊啊啊啊啊啊啊',
-							groupTime: '2020/09/19',
-							party: '信科院第一党支部'
-						}, {
-							groupName: '王小虎',
-							groupPhone: '1375464634',
-							groupAddress: '仲恺农业工程学院',
-							groupNote: '啊啊啊啊啊啊啊啊啊啊啊啊啊',
-							groupTime: '2020/09/19',
-							party: '信科院第一党支部'
-						}]
+					fetchData() {
+						axios.post(`/group/findPage.do?page=${this.currentPage}&size=${this.size}`,this.searchMap).then(response => {
+							this.tableData = response.data.rows;
+							this.total = response.data.total;
+						});
+					},
+					handleSizeChange(val) {
+						this.size = val;
+						this.fetchData();
+					},
+					handleCurrentChange(val) {
+						this.currentPage = val;
+						this.fetchData();
 					},
 					toggleSelection(rows) {
 						if (rows) {
@@ -415,61 +363,53 @@
 					handleSelectionChange(val) {
 						this.multipleSelection = val;//val是一个数组
 					},
-					handleSizeChange(val) {
-						console.log(`每页 ${val} 条`);
-					},
-					handleCurrentChange(val) {
-						console.log(`当前页: ${val}`);
-					},
+
 					// 监听修改党小组对话框的关闭事件
 					editDialogClosed() {
 						this.$refs.editFormRef.resetFields()
 					},
 					// 点击按钮，添加新党小组
-					addGroup() {
+					add() {
 						this.$refs.addFormRef.validate(async valid => {
 							if (!valid) return
 							// 可以发起添加党小组的网络请求
-
-							this.$message.success('添加党小组成功！')
-							// 隐藏添加党小组的对话框
-							this.addDialogVisible = false
-							// 重新获取党小组列表数据
-							this.getGroupList()
+							axios.post(`/group/add.do`,this.addForm).then(response => {
+								this.$message.success('添加党小组成功！');
+								// 重新获取党小组列表数据
+								this.fetchData();
+								// 隐藏添加党小组的对话框
+								this.addDialogVisible = false;
+							});
 						})
 					},
 					// 监听添加党小组对话框的关闭事件
 					addDialogClosed() {
-						this.$refs.addFormRef.resetFields()
+						this.$refs.addFormRef.resetFields();
 					},
 					// 展示编辑党小组的对话框
 					showEditDialog(id) {
-						// console.log(id)
-						this.editForm = {
-							id: '1',
-							groupName: '廖盛浪',
-							groupPhone: '13710007291',
-							groupAddress: '仲恺农业工程学院',
-							groupNote: '啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊'
-						}
-						this.editDialogVisible = true
+						axios.get(`/group/findById.do?id=${id}`).then(response => {
+							this.editForm = response.data;
+						})
+						this.editDialogVisible = true;
 					},
 					// 修改党小组信息并提交
-					editGroupInfo() {
+					edit() {
 						this.$refs.editFormRef.validate(async valid => {
 							if (!valid) return
 							// 发起修改党小组信息的数据请求
-
-							// 关闭对话框
-							this.editDialogVisible = false
-							// 刷新数据列表
-							this.getGroupList()
-							// 提示修改成功
-							this.$message.success('更新党小组信息成功！')
+							axios.post(`/group/update.do`,this.editForm).then(response => {
+								// 提示修改成功
+								this.$message.success('更新党小组信息成功！');
+								// 重新获取党小组列表数据
+								this.fetchData();
+								// 隐藏添加党小组的对话框
+								this.editDialogVisible = false;
+							});
 						})
 					},
 					// 根据Id删除对应的党小组信息
-					async removeGroupById(id) {
+					async dele(id) {
 						// 弹框询问党小组是否删除数据
 						const confirmResult = await this.$confirm(
 								'此操作将永久删除该党小组, 是否继续?',
@@ -487,11 +427,11 @@
 						if (confirmResult !== 'confirm') {
 							return this.$message.info('已取消删除')
 						}
-
 						//此处向后台发请求进行删除
-
-						this.$message.success('删除党小组成功！')
-						this.getGroupList()
+						axios.get(`/group/delete.do?id=${id}`).then(response => {
+							this.$message.success('删除党小组成功！')
+							this.fetchData();
+						})
 					},
 					showRelationshipDialog(id) {
 						this.formLabelAlign = {

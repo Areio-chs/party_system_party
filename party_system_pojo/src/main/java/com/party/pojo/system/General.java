@@ -18,7 +18,7 @@ public class General implements Serializable{
 
 	private String generalName;//党总支名字
 
-	private Integer generalPhone;//党总支电话
+	private String generalPhone;//党总支电话
 
 	private String generalAddress;//党总支地址
 
@@ -43,10 +43,10 @@ public class General implements Serializable{
 		this.generalName = generalName;
 	}
 
-	public Integer getGeneralPhone() {
+	public String getGeneralPhone() {
 		return generalPhone;
 	}
-	public void setGeneralPhone(Integer generalPhone) {
+	public void setGeneralPhone(String generalPhone) {
 		this.generalPhone = generalPhone;
 	}
 

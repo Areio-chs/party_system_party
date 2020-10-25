@@ -45,6 +45,7 @@ public class LeagueBranchController {
 
     @PostMapping("/add")
     public Result add(@RequestBody LeagueBranch leagueBranch){
+        leagueBranch.setCreateTime(new Date());
         leagueBranchService.add(leagueBranch);
         return new Result();
     }

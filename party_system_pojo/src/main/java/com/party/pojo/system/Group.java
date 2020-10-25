@@ -1,6 +1,7 @@
 package com.party.pojo.system;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.io.Serializable;
 /**
  * group实体类
@@ -18,7 +19,7 @@ public class Group implements Serializable{
 
 	private String groupName;//党小组名字
 
-	private Integer groupPhone;//党小组电话
+	private String groupPhone;//党小组电话
 
 	private String groupAddress;//党小组地址
 
@@ -27,6 +28,10 @@ public class Group implements Serializable{
 	private String groupNote;//备注
 
 	private Integer partyId;//党支部id
+
+	//处理不在数据库的字段
+	@Transient
+	private String partyName;//党支部名
 
 	private Integer accountId;//账户id
 
@@ -45,10 +50,10 @@ public class Group implements Serializable{
 		this.groupName = groupName;
 	}
 
-	public Integer getGroupPhone() {
+	public String getGroupPhone() {
 		return groupPhone;
 	}
-	public void setGroupPhone(Integer groupPhone) {
+	public void setGroupPhone(String groupPhone) {
 		this.groupPhone = groupPhone;
 	}
 
@@ -79,6 +84,10 @@ public class Group implements Serializable{
 	public void setPartyId(Integer partyId) {
 		this.partyId = partyId;
 	}
+
+	public String getPartyName() { return partyName; }
+
+	public void setPartyName(String partyName) { this.partyName = partyName; }
 
 	public Integer getAccountId() {
 		return accountId;

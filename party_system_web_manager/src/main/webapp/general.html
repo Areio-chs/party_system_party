@@ -33,20 +33,20 @@
 						<!-- 搜索与添加区域 -->
 						<el-form :inline="true" ref="form" :model="queryInfo" size="mini" label-width="70px">
 							<el-form-item>
-								<el-input placeholder="请输入党总支名字" v-model="queryInfo.generalName" clearable>
-									<el-button slot="append" icon="el-icon-search"></el-button>
+								<el-input placeholder="请输入党总支名字" v-model="searchMap.generalName" clearable>
+									<el-button slot="append" icon="el-icon-search" type="primary" @click="fetchData"></el-button>
 								</el-input>
 							</el-form-item>
 
 							<el-form-item>
-								<el-button type="primary" icon="el-icon-plus" @click="addDialogVisible = true">添加</el-button>
+								<el-button type="primary" icon="el-icon-plus" @click="addDialogVisible = true;addForm={}">添加</el-button>
 								<el-button type="success" icon="el-icon-download">导出</el-button>
 							</el-form-item>
 						</el-form>
 
 						<el-table
 								ref="multipleTable"
-								:data="GeneralList"
+								:data="tableData"
 								tooltip-effect="dark"
 								style="width: 100%"
 								size="mini"
@@ -97,7 +97,7 @@
 									</el-tooltip>
 									<!-- 删除按钮 -->
 									<el-tooltip effect="dark" content="删除信息" placement="top" :enterable="false">
-										<el-button type="danger" icon="el-icon-delete" size="mini" @click="removeGeneralById(scope.row.id)"></el-button>
+										<el-button type="danger" icon="el-icon-delete" size="mini" @click="dele(scope.row.id)"></el-button>
 									</el-tooltip>
 								</template>
 							</el-table-column>
@@ -106,9 +106,9 @@
 						<!-- 分页区域 -->
 						<el-pagination @size-change="handleSizeChange"
 									   @current-change="handleCurrentChange"
-									   :current-page="queryInfo.pagenum"
-									   :page-sizes="[1, 2, 5, 10]"
-									   :page-size="queryInfo.pagesize"
+									   :current-page.sync="currentPage"
+									   :page-sizes="[5, 10, 20, 30]"
+									   :page-size="size"
 									   layout="total, sizes, prev, pager, next, jumper"
 									   :total="total">
 						</el-pagination>
@@ -138,7 +138,7 @@
 							<!-- 底部区域 -->
 							<span slot="footer" class="dialog-footer">
         					<el-button @click="addDialogVisible = false">取 消</el-button>
-        					<el-button type="primary" @click="addGeneral">确 定</el-button>
+        					<el-button type="primary" @click="add()">确 定</el-button>
       					</span>
 						</el-dialog>
 
@@ -165,7 +165,7 @@
 							</el-form>
 							<span slot="footer" class="dialog-footer">
         					<el-button @click="editDialogVisible = false">取 消</el-button>
-        					<el-button type="primary" @click="editGeneralInfo">确 定</el-button>
+        					<el-button type="primary" @click="edit()">确 定</el-button>
       					</span>
 						</el-dialog>
 					</el-card>
@@ -199,20 +199,18 @@
 					cb(new Error('请输入合法的手机号'))
 				}
 				return {
-					// 获取党总支列表的参数对象
-					queryInfo: {
-						// 当前的页数
-						pagenum: 1,
-						// 当前每页显示多少条数据
-						pagesize: 2,
-						//按名字查询
-						generalName: ''
-					},
-					GeneralList: [],
+
+					tableData: [],
+					//全选
+					multipleSelection: [],
 					//当前页
-					currentPage4: 1,
+					currentPage: 1,
 					//总数
 					total: 10,
+					//显示条数
+					size:10,
+					//查询条件
+					searchMap:{},
 					// 控制修改党总支对话框的显示与隐藏
 					editDialogVisible: false,
 					// 查询到的党总支信息对象
@@ -227,12 +225,7 @@
 					// 控制添加党总支对话框的显示与隐藏
 					addDialogVisible: false,
 					// 添加党总支的表单数据
-					addForm: {
-						generalName: '',
-						generalPhone: '',
-						generalAddress: '',
-						generalNote: ''
-					},
+					addForm: {},
 					// 添加表单的验证规则对象
 					addFormRules: {
 						generalPhone: [
@@ -243,110 +236,68 @@
 				}
 			},
 			created() {
-				this.getGeneralList()
+				this.fetchData()
 			},
 			methods: {
-				getGeneralList() {
-					//向后台获取党总支列表
-					this.GeneralList = [{
-						generalName: '赖乐宗',
-						generalPhone: '1375464634',
-						generalAddress: '仲恺农业工程学院',
-						generalNote:'啊啊啊啊啊啊啊啊啊啊',
-						generalTime: '2020/09/19'
-					}, {
-						generalName: '王小虎',
-						generalPhone: '1375464634',
-						generalAddress: '仲恺农业工程学院',
-						generalNote:'啊啊啊啊啊啊啊啊啊啊',
-						generalTime: '2020/09/20'
-					}, {
-						generalName: '赖乐宗',
-						generalPhone: '1375464634',
-						generalAddress: '仲恺农业工程学院',
-						generalNote:'啊啊啊啊啊啊啊啊啊啊',
-						generalTime: '2020/09/19'
-					}, {
-						generalName: '王小虎',
-						generalPhone: '1375464634',
-						generalAddress: '仲恺农业工程学院',
-						generalNote:'啊啊啊啊啊啊啊啊啊啊',
-						generalTime: '2020/09/19'
-					}, {
-						generalName: '赖乐宗',
-						generalPhone: '1375464634',
-						generalAddress: '仲恺农业工程学院',
-						generalNote:'啊啊啊啊啊啊啊啊啊啊',
-						generalTime: '2020/09/02'
-					}, {
-						generalName: '王小虎',
-						generalPhone: '1375464634',
-						generalAddress: '仲恺农业工程学院',
-						generalNote:'啊啊啊啊啊啊啊啊啊啊',
-						generalTime: '2020/09/21'
-					}, {
-						generalName: '赖乐宗',
-						generalPhone: '1375464634',
-						generalAddress: '仲恺农业工程学院',
-						generalNote:'啊啊啊啊啊啊啊啊啊啊',
-						generalTime: '2020/10/19'
-					}]
+				fetchData() {
+					axios.post(`/general/findPage.do?page=${this.currentPage}&size=${this.size}`,this.searchMap).then(response => {
+						this.tableData = response.data.rows;
+						this.total = response.data.total;
+					});
 				},
 				handleSizeChange(val) {
-					console.log(`每页 ${val} 条`);
+					this.size = val;
+					this.fetchData();
 				},
 				handleCurrentChange(val) {
-					console.log(`当前页: ${val}`);
+					this.currentPage = val;
+					this.fetchData();
 				},
 				// 监听修改党总支对话框的关闭事件
 				editDialogClosed() {
 					this.$refs.editFormRef.resetFields()
 				},
 				// 点击按钮，添加新党总支
-				addGeneral() {
+				add() {
 					this.$refs.addFormRef.validate(async valid => {
 						if (!valid) return
-						// 可以发起添加党总支的网络请求
-
-						this.$message.success('添加党总支成功！')
-						// 隐藏添加党总支的对话框
-						this.addDialogVisible = false
-						// 重新获取党总支列表数据
-						this.getGeneralList()
+						axios.post(`/general/add.do`,this.addForm).then(response => {
+							this.$message.success('添加党总支成功！');
+							// 重新获取党支部列表数据
+							this.fetchData();
+							// 隐藏添加党支部的对话框
+							this.addDialogVisible = false;
+						});
 					})
 				},
 				// 监听添加党总支对话框的关闭事件
 				addDialogClosed() {
-					this.$refs.addFormRef.resetFields()
+					this.$refs.addFormRef.resetFields();
 				},
 				// 展示编辑党总支的对话框
 				showEditDialog(id) {
-					// console.log(id)
-					this.editForm = {
-						id: '1',
-						generalName: '廖盛浪',
-						generalPhone: '13710007291',
-						generalAddress: '仲恺农业工程学院',
-						generalNote: '啊啊啊啊啊啊啊啊啊啊啊'
-					}
+					axios.get(`/general/findById.do?id=${id}`).then(response => {
+						this.editForm = response.data;
+					})
 					this.editDialogVisible = true
 				},
 				// 修改党总支信息并提交
-				editGeneralInfo() {
+				edit() {
 					this.$refs.editFormRef.validate(async valid => {
 						if (!valid) return
 						// 发起修改党总支信息的数据请求
-
-						// 关闭对话框
-						this.editDialogVisible = false
-						// 刷新数据列表
-						this.getGeneralList()
-						// 提示修改成功
-						this.$message.success('更新党总支信息成功！')
+						axios.post(`/general/update.do`,this.editForm).then(response => {
+							// 提示修改成功
+							this.$message.success('更新党总支信息成功！');
+							// 重新获取党支部列表数据
+							this.fetchData();
+							// 隐藏添加党支部的对话框
+							this.editDialogVisible = false;
+						});
 					})
 				},
 				// 根据Id删除对应的党总支信息
-				async removeGeneralById(id) {
+				async dele(id) {
 					// 弹框询问党总支是否删除数据
 					const confirmResult = await this.$confirm(
 							'此操作将永久删除该党总支, 是否继续?',
@@ -357,18 +308,17 @@
 								type: 'warning'
 							}
 					).catch(err => err)
-
 					// 如果党总支确认删除，则返回值为字符串 confirm
 					// 如果党总支取消了删除，则返回值为字符串 cancel
 					// console.log(confirmResult)
 					if (confirmResult !== 'confirm') {
 						return this.$message.info('已取消删除')
 					}
-
 					//此处向后台发请求进行删除
-
-					this.$message.success('删除党总支成功！')
-					this.getGeneralList()
+					axios.get(`/general/delete.do?id=${id}`).then(response => {
+						this.$message.success('删除党总支成功！');
+						this.fetchData();
+					})
 				},
 				//单元格被点击
 				cellClick(row, column, cell, event) {
@@ -378,7 +328,6 @@
 							icon: 'fa-address-book',
 							title: '党总支详情'
 						});
-
 					}else {
 						return
 					}

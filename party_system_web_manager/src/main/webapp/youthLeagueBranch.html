@@ -37,8 +37,8 @@
 						<!-- 搜索与添加区域 -->
 						<el-form :inline="true" ref="form" :model="queryInfo" size="mini" label-width="70px">
 							<el-form-item>
-								<el-input placeholder="请输入名称" v-model="queryInfo.groupName" clearable>
-									<el-button slot="append" icon="el-icon-search"></el-button>
+								<el-input placeholder="请输入名称" v-model="searchMap.name" clearable>
+									<el-button slot="append" icon="el-icon-search" type="primary" @click="fetchData"></el-button>
 								</el-input>
 							</el-form-item>
 
@@ -51,7 +51,7 @@
 
 						<el-table
 								ref="multipleTable"
-								:data="GroupList"
+								:data="tableData"
 								tooltip-effect="dark"
 								style="width: 100%"
 								size="mini"
@@ -95,7 +95,7 @@
 									sortable>
 							</el-table-column>
 							<el-table-column
-									prop="group"
+									prop="groupName"
 									label="所属党小组"
 									sortable>
 							</el-table-column>
@@ -107,7 +107,7 @@
 									</el-tooltip>
 									<!-- 删除按钮 -->
 									<el-tooltip effect="dark" content="删除信息" placement="top" :enterable="false">
-										<el-button type="danger" icon="el-icon-delete" size="mini" @click="removeGroupById(scope.row.id)"></el-button>
+										<el-button type="danger" icon="el-icon-delete" size="mini" @click="dele(scope.row.id)"></el-button>
 									</el-tooltip>
 								</template>
 							</el-table-column>
@@ -116,31 +116,32 @@
 						<!-- 分页区域 -->
 						<el-pagination @size-change="handleSizeChange"
 									   @current-change="handleCurrentChange"
-									   :current-page="queryInfo.pagenum"
-									   :page-sizes="[1, 2, 5, 10]"
-									   :page-size="queryInfo.pagesize"
+									   :current-page.sync="currentPage"
+									   :page-sizes="[5, 10, 20, 30]"
+									   :page-size="size"
 									   layout="total, sizes, prev, pager, next, jumper"
 									   :total="total">
 						</el-pagination>
+
 						<!-- 添加团支部的对话框 -->
 						<el-dialog title="添加团支部" :visible.sync="addDialogVisible" width="50%" @close="addDialogClosed">
 							<!-- 内容主体区域 -->
 							<el-form :model="addForm" :rules="addFormRules" ref="addFormRef" label-width="70px">
-								<el-form-item label="名字" prop="groupName">
-									<el-input v-model="addForm.groupName"></el-input>
+								<el-form-item label="名字" prop="name">
+									<el-input v-model="addForm.name"></el-input>
 								</el-form-item>
-								<el-form-item label="电话" prop="groupPhone">
-									<el-input v-model="addForm.groupPhone"></el-input>
+								<el-form-item label="电话" prop="phone">
+									<el-input v-model="addForm.phone"></el-input>
 								</el-form-item>
-								<el-form-item label="地址" prop="groupAddress">
-									<el-input v-model="addForm.groupAddress"></el-input>
+								<el-form-item label="地址" prop="address">
+									<el-input v-model="addForm.address"></el-input>
 								</el-form-item>
-								<el-form-item label="备注" prop="groupNote">
+								<el-form-item label="备注" prop="note">
 									<el-input
 											type="textarea"
 											:rows="2"
 											placeholder="请输入内容"
-											v-model="addForm.groupNote">
+											v-model="addForm.note">
 									</el-input>
 								</el-form-item>
 								<el-form-item label="上级">
@@ -157,28 +158,28 @@
 							<!-- 底部区域 -->
 							<span slot="footer" class="dialog-footer">
         					<el-button @click="addDialogVisible = false">取 消</el-button>
-        					<el-button type="primary" @click="addGroup">确 定</el-button>
+        					<el-button type="primary" @click="add()">确 定</el-button>
       					</span>
 						</el-dialog>
 
 						<!-- 修改信息的对话框 -->
 						<el-dialog title="修改团支部信息" :visible.sync="editDialogVisible" width="50%" @close="editDialogClosed">
 							<el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="70px">
-								<el-form-item label="名字" prop="groupName">
-									<el-input v-model="editForm.groupName"></el-input>
+								<el-form-item label="名字" prop="name">
+									<el-input v-model="editForm.name"></el-input>
 								</el-form-item>
-								<el-form-item label="电话" prop="groupPhone">
-									<el-input v-model="editForm.groupPhone"></el-input>
+								<el-form-item label="电话" prop="phone">
+									<el-input v-model="editForm.phone"></el-input>
 								</el-form-item>
-								<el-form-item label="地址" prop="groupAddress">
-									<el-input v-model="editForm.groupAddress"></el-input>
+								<el-form-item label="地址" prop="address">
+									<el-input v-model="editForm.address"></el-input>
 								</el-form-item>
-								<el-form-item label="备注" prop="groupNote">
+								<el-form-item label="备注" prop="note">
 									<el-input
 											type="textarea"
 											:rows="2"
 											placeholder="请输入内容"
-											v-model="editForm.groupNote">
+											v-model="editForm.note">
 									</el-input>
 								</el-form-item>
 								<el-form-item label="上级">
@@ -193,7 +194,7 @@
 							</el-form>
 							<span slot="footer" class="dialog-footer">
         					<el-button @click="editDialogVisible = false">取 消</el-button>
-        					<el-button type="primary" @click="editGroupInfo">确 定</el-button>
+        					<el-button type="primary" @click="edit()">确 定</el-button>
       					</span>
 						</el-dialog>
 
@@ -254,22 +255,17 @@
 						cb(new Error('请输入合法的手机号'))
 					}
 					return {
-						// 获取团支部列表的参数对象
-						queryInfo: {
-							// 当前的页数
-							pagenum: 1,
-							// 当前每页显示多少条数据
-							pagesize: 2,
-							//按名字查询
-							groupName: ''
-						},
-						GroupList: [],
+						tableData: [],
 						//全选
 						multipleSelection: [],
 						//当前页
-						currentPage4: 1,
+						currentPage: 1,
 						//总数
 						total: 10,
+						//显示条数
+						size:10,
+						//查询条件
+						searchMap:{},
 						// 控制修改团支部对话框的显示与隐藏
 						editDialogVisible: false,
 						// 查询到的团支部信息对象
@@ -290,12 +286,7 @@
 						// 控制添加团支部对话框的显示与隐藏
 						addDialogVisible: false,
 						// 添加团支部的表单数据
-						addForm: {
-							groupName: '',
-							groupPhone: '',
-							groupAddress: '',
-							groupNote: ''
-						},
+						addForm: {},
 						// 添加表单的验证规则对象
 						addFormRules: {
 							groupName: [
@@ -319,61 +310,22 @@
 					}
 				},
 				created() {
-					this.getGroupList()
+					this.fetchData();
 				},
 				methods: {
-					getGroupList() {
-						//向后台获取团支部列表
-						this.GroupList = [{
-							name: '第一团支部',
-							phone: '1375464634',
-							address: '仲恺农业工程学院',
-							note:'啊啊啊啊啊啊啊啊啊啊啊啊啊',
-							createTime: '2020/09/19',
-							group: '信科院第一党支部'
-						}, {
-							name: '第二团支部',
-							phone: '1375464634',
-							address: '仲恺农业工程学院',
-							note:'啊啊啊啊啊啊啊啊啊啊啊啊啊',
-							createTime: '2020/09/19',
-							group: ''
-						}, {
-							name: '第三团支部',
-							phone: '1375464634',
-							address: '仲恺农业工程学院',
-							note:'啊啊啊啊啊啊啊啊啊啊啊啊啊',
-							createTime: '2020/09/19',
-							group: '信科院第一党支部'
-						}, {
-							name: '第四团支部',
-							phone: '1375464634',
-							address: '仲恺农业工程学院',
-							note:'啊啊啊啊啊啊啊啊啊啊啊啊啊',
-							createTime: '2020/09/19',
-							group: '信科院第一党支部'
-						}, {
-							name: '第五团支部',
-							phone: '1375464634',
-							address: '仲恺农业工程学院',
-							note:'啊啊啊啊啊啊啊啊啊啊啊啊啊',
-							createTime: '2020/09/19',
-							group: '信科院第一党支部'
-						}, {
-							name: '第六团支部',
-							phone: '1375464634',
-							address: '仲恺农业工程学院',
-							note:'啊啊啊啊啊啊啊啊啊啊啊啊啊',
-							createTime: '2020/09/19',
-							group: '信科院第一党支部'
-						}, {
-							name: '第七团支部',
-							phone: '1375464634',
-							address: '仲恺农业工程学院',
-							note:'啊啊啊啊啊啊啊啊啊啊啊啊啊',
-							createTime: '2020/09/19',
-							group: ''
-						}]
+					fetchData() {
+						axios.post(`/leagueBranch/findPage.do?page=${this.currentPage}&size=${this.size}`,this.searchMap).then(response => {
+							this.tableData = response.data.rows;
+							this.total = response.data.total;
+						});
+					},
+					handleSizeChange(val) {
+						this.size = val;
+						this.fetchData();
+					},
+					handleCurrentChange(val) {
+						this.currentPage = val;
+						this.fetchData();
 					},
 					toggleSelection(rows) {
 						if (rows) {
@@ -387,46 +339,35 @@
 					handleSelectionChange(val) {
 						this.multipleSelection = val;//val是一个数组
 					},
-					handleSizeChange(val) {
-						console.log(`每页 ${val} 条`);
-					},
-					handleCurrentChange(val) {
-						console.log(`当前页: ${val}`);
-					},
 					addDialogOpen() {
-						this.getGroups()
-						this.addDialogVisible = true
+						this.getGroups();
+						this.addDialogVisible = true;
 					},
 					// 点击按钮，添加新团支部
-					addGroup() {
+					add() {
 						this.$refs.addFormRef.validate(async valid => {
 							if (!valid) return
 							// 可以发起添加团支部的网络请求
-
-							this.$message.success('添加团支部成功！')
-							// 隐藏添加团支部的对话框
-							this.addDialogVisible = false
-							// 重新获取团支部列表数据
-							this.getGroupList()
+							axios.post(`/leagueBranch/add.do`,this.addForm).then(response => {
+								this.$message.success('添加团支部成功！')
+								// 重新获取团支部列表数据
+								this.fetchData();
+								// 隐藏添加团支部的对话框
+								this.addDialogVisible = false;
+							});
 						})
 					},
 					// 监听添加团支部对话框的关闭事件
 					addDialogClosed() {
-						this.$refs.addFormRef.resetFields()
+						this.$refs.addFormRef.resetFields();
 						this.groups = []
 					},
 					// 展示编辑团支部的对话框
 					showEditDialog(id) {
-						// console.log(id)
-						this.editForm = {
-							id: '1',
-							groupName: '廖盛浪',
-							groupPhone: '13710007291',
-							groupAddress: '仲恺农业工程学院',
-							groupNote: '啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊'
-						}
-						this.getGroups()
-						this.editDialogVisible = true
+						axios.get(`/leagueBranch/findById.do?id=${id}`).then(response => {
+							this.editForm = response.data;
+						})
+						this.editDialogVisible = true;
 					},
 					// 监听修改团支部对话框的关闭事件
 					editDialogClosed() {
@@ -434,17 +375,18 @@
 						this.groups = []
 					},
 					// 修改团支部信息并提交
-					editGroupInfo() {
+					edit() {
 						this.$refs.editFormRef.validate(async valid => {
 							if (!valid) return
 							// 发起修改团支部信息的数据请求
-
-							// 关闭对话框
-							this.editDialogVisible = false
-							// 刷新数据列表
-							this.getGroupList()
-							// 提示修改成功
-							this.$message.success('更新团支部信息成功！')
+							axios.post(`/leagueBranch/update.do`,this.editForm).then(response => {
+								// 提示修改成功
+								this.$message.success('更新团支部信息成功！');
+								// 重新获取团支部列表数据
+								this.fetchData();
+								// 隐藏添加团支部的对话框
+								this.editDialogVisible = false;
+							});
 						})
 					},
 					showRelationshipDialog(id) {
@@ -579,7 +521,7 @@
 							}]
 					},
 					// 根据Id删除对应的团支部信息
-					async removeGroupById(id) {
+					async dele(id) {
 						// 弹框询问团支部是否删除数据
 						const confirmResult = await this.$confirm(
 								'此操作将永久删除该团支部, 是否继续?',
@@ -590,18 +532,17 @@
 									type: 'warning'
 								}
 						).catch(err => err)
-
 						// 如果团支部确认删除，则返回值为字符串 confirm
 						// 如果团支部取消了删除，则返回值为字符串 cancel
 						// console.log(confirmResult)
 						if (confirmResult !== 'confirm') {
 							return this.$message.info('已取消删除')
 						}
-
 						//此处向后台发请求进行删除
-
-						this.$message.success('删除团支部成功！')
-						this.getGroupList()
+						axios.get(`/leagueBranch/delete.do?id=${id}`).then(response => {
+							this.$message.success('删除团支部成功！');
+							this.fetchData();
+						})
 					},
 					//单元格被点击
 					cellClick(row, column, cell, event) {

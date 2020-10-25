@@ -44,6 +44,7 @@ public class PartyController {
 
     @PostMapping("/add")
     public Result add(@RequestBody Party party){
+        party.setPartyTime(new Date());
         partyService.add(party);
         return new Result();
     }

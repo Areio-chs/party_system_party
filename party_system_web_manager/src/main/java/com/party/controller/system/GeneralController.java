@@ -44,6 +44,7 @@ public class GeneralController {
 
     @PostMapping("/add")
     public Result add(@RequestBody General general){
+        general.setGeneralTime(new Date());
         generalService.add(general);
         return new Result();
     }

@@ -44,6 +44,7 @@ public class GroupController {
 
     @PostMapping("/add")
     public Result add(@RequestBody Group group){
+        group.setGroupTime(new Date());
         groupService.add(group);
         return new Result();
     }

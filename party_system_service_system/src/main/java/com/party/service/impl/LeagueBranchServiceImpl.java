@@ -80,8 +80,10 @@ public class LeagueBranchServiceImpl implements LeagueBranchService {
         Example example = createExample(searchMap);
         List<LeagueBranch> leagueBranchList = leagueBranchMapper.selectByExample(example);
         for (LeagueBranch leagueBranch : leagueBranchList) {
+            if (!(leagueBranch.getGroupId()==null)){
             Group group = groupMapper.selectByPrimaryKey(leagueBranch.getGroupId());
             leagueBranch.setGroupName(group.getGroupName());
+            }
         }
         Page<LeagueBranch> leagueBranchs = (Page<LeagueBranch>) leagueBranchList;
         return new PageResult<LeagueBranch>(leagueBranchs.getTotal(), leagueBranchs.getResult());
@@ -126,12 +128,12 @@ public class LeagueBranchServiceImpl implements LeagueBranchService {
 
     //两个只能选择一个或者两个都不选择
     @Override
-    public void tissueTransfer(Integer id,Integer group_id,Integer party_id) {
+    public void tissueTransfer(Integer id, Integer group_id, Integer party_id) {
         System.out.println("there");
         System.out.println(id);
         System.out.println(group_id);
         System.out.println(party_id);
-        if (group_id!=null){
+        if (group_id != null) {
             //先把这个党支部的党员全部转到这个党小组里面，再把党支部对接到该党小组
             //1.找出该团支部的所有党员
 //            Example example = new Example(LeagueMember.class);
@@ -152,8 +154,7 @@ public class LeagueBranchServiceImpl implements LeagueBranchService {
             leagueBranchMapper.updateByPrimaryKeySelective(leagueBranch);
 
 
-        }
-        else if (party_id!=null){
+        } else if (party_id != null) {
             //说明该党支部没有小组，团支部直接对接党支部，这时候设置党小组id为空
             LeagueBranch leagueBranch = new LeagueBranch();
             leagueBranch.setId(id);

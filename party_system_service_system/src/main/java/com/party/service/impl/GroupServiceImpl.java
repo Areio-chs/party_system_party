@@ -3,8 +3,11 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.party.dao.GroupMapper;
+import com.party.dao.PartyMapper;
 import com.party.entity.PageResult;
+import com.party.pojo.system.General;
 import com.party.pojo.system.Group;
+import com.party.pojo.system.Party;
 import com.party.service.system.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import tk.mybatis.mapper.entity.Example;
@@ -17,6 +20,9 @@ public class GroupServiceImpl implements GroupService {
 
     @Autowired
     private GroupMapper groupMapper;
+
+    @Autowired
+    private PartyMapper partyMapper;
 
     /**
      * 返回全部记录
@@ -58,7 +64,14 @@ public class GroupServiceImpl implements GroupService {
     public PageResult<Group> findPage(Map<String, Object> searchMap, int page, int size) {
         PageHelper.startPage(page,size);
         Example example = createExample(searchMap);
-        Page<Group> groups = (Page<Group>) groupMapper.selectByExample(example);
+        List<Group> groupList = groupMapper.selectByExample(example);
+        for (Group group : groupList) {
+            if (!(group.getPartyId()==null)){
+                Party party = partyMapper.selectByPrimaryKey(group.getPartyId());
+                group.setPartyName(party.getPartyName());
+            }
+        }
+        Page<Group> groups = (Page<Group>) groupList;
         return new PageResult<Group>(groups.getTotal(),groups.getResult());
     }
 

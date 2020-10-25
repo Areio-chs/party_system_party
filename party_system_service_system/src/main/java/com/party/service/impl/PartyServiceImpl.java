@@ -2,9 +2,10 @@ package com.party.service.impl;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.party.dao.GeneralMapper;
 import com.party.dao.PartyMapper;
 import com.party.entity.PageResult;
-import com.party.pojo.system.Party;
+import com.party.pojo.system.*;
 import com.party.service.system.PartyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import tk.mybatis.mapper.entity.Example;
@@ -17,6 +18,9 @@ public class PartyServiceImpl implements PartyService {
 
     @Autowired
     private PartyMapper partyMapper;
+
+    @Autowired
+    private GeneralMapper generalMapper;
 
     /**
      * 返回全部记录
@@ -58,7 +62,14 @@ public class PartyServiceImpl implements PartyService {
     public PageResult<Party> findPage(Map<String, Object> searchMap, int page, int size) {
         PageHelper.startPage(page,size);
         Example example = createExample(searchMap);
-        Page<Party> partys = (Page<Party>) partyMapper.selectByExample(example);
+        List<Party> partyList = partyMapper.selectByExample(example);
+        for (Party party : partyList) {
+            if (!(party.getGeneralId()==null)){
+            General general = generalMapper.selectByPrimaryKey(party.getGeneralId());
+            party.setGeneralName(general.getGeneralName());
+            }
+        }
+        Page<Party> partys = (Page<Party>) partyList;
         return new PageResult<Party>(partys.getTotal(),partys.getResult());
     }
 
