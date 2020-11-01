@@ -20,9 +20,9 @@ public class Activist implements Serializable{
 
 	private java.util.Date activistTime;//成为积极分子时间
 
-	private String culture1Id;//培养人1从base表查符合的人
+	private Integer culture1Id;//培养人1从base表查符合的人
 
-	private String culture2Id;//培养人2
+	private Integer culture2Id;//培养人2
 
 	private Integer generalId;//党总支id
 
@@ -56,17 +56,17 @@ public class Activist implements Serializable{
 		this.activistTime = activistTime;
 	}
 
-	public String getCulture1Id() {
+	public Integer getCulture1Id() {
 		return culture1Id;
 	}
-	public void setCulture1Id(String culture1Id) {
+	public void setCulture1Id(Integer culture1Id) {
 		this.culture1Id = culture1Id;
 	}
 
-	public String getCulture2Id() {
+	public Integer getCulture2Id() {
 		return culture2Id;
 	}
-	public void setCulture2Id(String culture2Id) {
+	public void setCulture2Id(Integer culture2Id) {
 		this.culture2Id = culture2Id;
 	}
 

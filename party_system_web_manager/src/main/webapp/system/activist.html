@@ -104,7 +104,7 @@
                         @size-change="fetchData"
                         @current-change="fetchData"
                         :current-page.sync="currentPage"
-                        :page-sizes="[10, 20, 30, 40]"
+                        :page-sizes="[4, 6, 8, 10]"
                         :page-size="size"
                         layout="total, sizes, prev, pager, next, jumper"
                         :total="total">
@@ -162,8 +162,8 @@
             return {
                 tableData: [],
                 currentPage: 1,
-                total: 10,
-                size: 10,
+                total: 4,
+                size: 4,
                 searchMap: {},
                 pojo: {},
                 formVisible: false,
@@ -175,6 +175,7 @@
         },
         methods:{
             fetchData (){
+                /*page和size靠请求路径传过去的，而searchMap靠参数，*/
                 axios.post(`/activist/findPage.do?page=${this.currentPage}&size=${this.size}`,this.searchMap).then(response => {
                     this.tableData = response.data.rows;
                     this.total = response.data.total;

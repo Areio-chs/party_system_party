@@ -14,7 +14,7 @@ public class BaseUser implements Serializable{
 	private Integer id;//id
 
 
-	
+
 
 	private String sid;//学号
 
@@ -75,6 +75,8 @@ public class BaseUser implements Serializable{
 	private String qq;//QQ
 
 	private String wechat;//微信
+
+	private Integer LeagueBranchId;
 
 	
 	public Integer getId() {
@@ -295,5 +297,11 @@ public class BaseUser implements Serializable{
 	}
 
 
-	
+	public Integer getLeagueBranchId() {
+		return LeagueBranchId;
+	}
+
+	public void setLeagueBranchId(Integer leagueBranchId) {
+		LeagueBranchId = leagueBranchId;
+	}
 }

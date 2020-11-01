@@ -1,6 +1,9 @@
 package com.party.service.system;
+import com.github.pagehelper.PageInfo;
 import com.party.entity.PageResult;
 import com.party.pojo.system.Activist;
+import com.party.vo.ActivistVo;
+import com.party.vo.AllActivistVo;
 
 import java.util.*;
 
@@ -10,16 +13,16 @@ import java.util.*;
 public interface ActivistService {
 
 
-    public List<Activist> findAll();
+//    public List<AllActivistVo> findAll();
 
 
-    public PageResult<Activist> findPage(int page, int size);
+    public PageInfo<AllActivistVo> findPage(int page, int size);
 
 
     public List<Activist> findList(Map<String,Object> searchMap);
 
 
-    public PageResult<Activist> findPage(Map<String,Object> searchMap,int page, int size);
+    public PageInfo<AllActivistVo> findPage(Map<String,Object> queryInfo, int page, int size);
 
 
     public Activist findById(Integer id);
@@ -32,4 +35,7 @@ public interface ActivistService {
 
     public void delete(Integer id);
 
+    public void upadateCultivate(Integer id, Map<String, String> cultivateMap);
+
+    public List<Activist> findActivistByName(String name) ;
 }

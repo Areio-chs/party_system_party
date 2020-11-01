@@ -164,10 +164,10 @@
             <div class="pagination-container">
                 <el-pagination
                         class="pagiantion"
-                        @size-change="fetchData"
-                        @current-change="fetchData"
+                        @size-change="handleSizeChange"
+                        @current-change="handleCurrentChange"
                         :current-page.sync="currentPage"
-                        :page-sizes="[10, 20, 30, 40]"
+                        :page-sizes="[4, 6, 8, 10]"
                         :page-size="size"
                         layout="total, sizes, prev, pager, next, jumper"
                         :total="total">
@@ -258,7 +258,16 @@
             this.fetchData();
         },
         methods:{
+            handleSizeChange(val){
+                this.size=val;
+                this.fetchData();
+            },
+            handleCurrentChange(val){
+                this.currentPage=val;
+                this.fetchData();
+            },
             fetchData (){
+
                 axios.post(`/baseUser/findPage.do?page=${this.currentPage}&size=${this.size}`,this.searchMap).then(response => {
                     this.tableData = response.data.rows;
                     this.total = response.data.total;

@@ -34,6 +34,8 @@ public class LeagueBranch implements Serializable{
 
 	private Integer partyId;
 
+
+
 	
 	public Integer getId() {
 		return id;
